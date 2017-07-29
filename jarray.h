@@ -1,11 +1,13 @@
 #pragma once
 #include <memory>
 
-class jarray
+class jarray1
 {
 public:
-	jarray() {}
-	jarray(std::initializer_list<int>li)
+	jarray1()
+	{
+	}
+	jarray1(std::initializer_list<int>li)
 	{
 		b* k = new b(li.size());
 		s = li.size();
@@ -15,18 +17,22 @@ public:
 			((*data).v)[i] = *(li.begin() + i);
 		}
 	}
-	jarray(int s)
+	jarray1(int s)
 	{
 		b* k = new b(s);
 		s = s;
 		data = std::shared_ptr<b>(k);
 	}
-	jarray(jarray&t)
+	jarray1(int ts1, int ini) :jarray1(ts1)
+	{
+		memset(data->v, 0, ts1 * 4);
+	}
+	jarray1(jarray1&t)
 	{
 		data = t.data;
 		s = t.s;
 	}
-	int& jarray::operator[](int k);
+	int& jarray1::operator[](int k);
 	int size()
 	{
 		return s;
@@ -48,7 +54,7 @@ private:
 	std::shared_ptr<b>data;
 	int s;
 };
-int& jarray::operator[](int k)
+int& jarray1::operator[](int k)
 {
 	if (k >= 0 && k < s)
 		return ((*data).v)[k];
@@ -60,13 +66,19 @@ int& jarray::operator[](int k)
 class jarray2
 {
 public:
-	jarray2() {}
+	jarray2()
+	{
+	}
 	jarray2(int ts1, int ts2)
 	{
 		c* k = new c(ts1, ts2);
 		s1 = ts1;
 		s2 = ts2;
 		data = std::shared_ptr<c>(k);
+	}
+	jarray2(int ts1, int ts2, int ini) :jarray2(ts1, ts2)
+	{
+		memset(data->v, 0, ts1*ts2 * 4);
 	}
 	jarray2(jarray2&t)
 	{
@@ -86,10 +98,7 @@ public:
 		}
 		else
 		{
-			//throw std::exception("this index is invalid");
-			std::cout << "this index is invalid\n";
-			c i(1, 1);
-			return i;
+			throw std::exception("this index is invalid");
 		}
 	}
 	std::pair<int, int> size()
@@ -118,14 +127,220 @@ public:
 				return v[k1*s1 + k];
 			else
 			{
-				//throw std::exception("this index is invalid");
-				std::cout << "this index is invalid\n";
-				int i = 0;
-				return i;
+				throw std::exception("this index is invalid");
 			}
 		}
 	};
 private:
 	std::shared_ptr<c>data;
 	int s1, s2;
+};
+
+
+
+class jarray3
+{
+public:
+	class a
+	{
+	public:
+		a()
+		{
+		}
+		~a()
+		{
+			delete[] v;
+		}
+		int s;
+		int * v;
+		int index;
+		int size()
+		{
+			return s;
+		}
+		int& a::operator[](int k)
+		{
+			if (k >= 0 && k < s)
+			{
+				return v[index + k];
+			}
+			else
+				throw std::exception("the 3rd index is invalid");
+		}
+	};
+	class b
+	{
+	public:
+		b()
+		{
+			aa = new a();
+		}
+		~b()
+		{
+			delete aa;
+		}
+		int s;
+		a* aa;
+		int size()
+		{
+			return s;
+		}
+		a& b::operator[](int k)
+		{
+			if (k >= 0 && k < s)
+			{
+				aa->index += k*s;
+				return *aa;
+			}
+			else
+				throw std::exception("the 2rd index is invalid");
+		}
+	};
+	jarray3()
+	{
+	}
+	jarray3(int ts1, int ts2, int ts3)
+	{
+		data = std::shared_ptr<b>(new b());
+		s = ts1;
+		data->s = ts2;
+		data->aa->s = ts3;
+		data->aa->v = new int[ts1*ts2*ts3];
+	}
+	jarray3(int ts1, int ts2, int ts3, int ini) :jarray3(ts1, ts2, ts3)
+	{
+		memset(data->aa->v, 0, ts1*ts2*ts3 * 4);
+	}
+	jarray3(jarray3&t)
+	{
+		data = t.data;
+		s = t.s;
+		data->s = t.data->s;
+		data->aa->s = t.data->aa->s;
+	}
+	b& jarray3::operator[](int k)
+	{
+		if (k >= 0 && k < s)
+		{
+			data->aa->index = k*s*(data->s);
+			return (*data);
+		}
+		else
+			throw std::exception("the 1st index is invalid");
+	}
+	int size()
+	{
+		return s;
+	}
+	std::shared_ptr<b>data;
+	int s;
+};
+
+void ___SimpleJarrayDeleter(int** p)
+{
+	delete[](*p);
+	delete p;
+}
+class jarrayn
+{
+public:
+	jarrayn()
+	{
+		/*
+		int* a = new int[1];
+		int* b = new int[1];
+		int **c = new int*(a);
+		int ** d = new int*(b);
+		p = std::shared_ptr<int*>(c, ___SimpleJarrayDeleter);
+		s = std::shared_ptr<int*>(d, ___SimpleJarrayDeleter);
+		*/
+		d = 0;
+	}
+	jarrayn(int ts)
+	{
+		d = 1;
+		int* a = new int[ts];
+		int* b = new int[1];
+		int **c = new int*(a);
+		int ** d = new int*(b);
+		p = std::shared_ptr<int*>(c, ___SimpleJarrayDeleter);
+		s = std::shared_ptr<int*>(d, ___SimpleJarrayDeleter);
+		(*s)[0] = ts;
+	}
+	jarrayn(int ts, int in)
+	{
+		d = 1;
+		int* a = new int[ts];
+		int* b = new int[1];
+		int **c = new int*(a);
+		int ** d = new int*(b);
+		p = std::shared_ptr<int*>(c, ___SimpleJarrayDeleter);
+		s = std::shared_ptr<int*>(d, ___SimpleJarrayDeleter);
+		(*s)[0] = ts;
+		if (in)
+			memset(*p, 0, (*s)[0] * 4);
+	}
+	jarrayn(std::initializer_list<int>li)
+	{
+		int size = 1;
+		d = li.size() - 1;
+		int * a = new int[d];
+		int **c = new int*(a);
+		s = std::shared_ptr<int*>(c, ___SimpleJarrayDeleter);
+		for (int i = 0; i < d; ++i)
+		{
+			size *= *(li.begin() + i);
+			(*s)[i] = *(li.begin() + i);
+		}
+		int * b = new int[size];
+		int ** d = new int*(b);
+		p = std::shared_ptr<int*>(d, ___SimpleJarrayDeleter);
+		if (*(li.end() - 1))
+			memset(&(*p)[0], 0, size * 4);
+	}
+	jarrayn(jarrayn& t)
+	{
+		d = t.d;
+		p = t.p;
+		s = t.s;
+	}
+	int* get()
+	{
+		return *p;
+	}
+	int& get(int index)
+	{
+		return (*p)[index];
+	}
+	int& get(std::initializer_list<int>in)
+	{
+		//if (in.size() == d)
+		
+			int index = 0;
+			index += *(in.begin());
+			for (int i = 1; i < d; ++i)
+			{
+				index *= (*s)[i - 1];
+				index += *(in.begin() + i);
+			}
+			return (*p)[index];
+		
+
+	}
+	int size()
+	{
+		return (*s)[0];
+	}
+	int size(std::initializer_list<int>in)
+	{
+		return (*s)[in.size()];
+	}
+	int dimension()
+	{
+		return d;
+	}
+private:
+	int d;
+	std::shared_ptr<int*>p;
+	std::shared_ptr<int*>s;
 };

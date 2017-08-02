@@ -25,7 +25,7 @@ public:
 	}
 	jarray1(int ts1, int ini) :jarray1(ts1)
 	{
-		memset(data->v, 0, ts1 * 4);
+		memset(data->v, 0 , ts1 * 4);
 	}
 	jarray1(jarray1&t)
 	{
@@ -56,10 +56,7 @@ private:
 };
 int& jarray1::operator[](int k)
 {
-	if (k >= 0 && k < s)
-		return ((*data).v)[k];
-	else
-		throw std::exception("this index is invalid");
+	return ((*data).v)[k];
 }
 
 
@@ -73,7 +70,6 @@ public:
 	{
 		c* k = new c(ts1, ts2);
 		s1 = ts1;
-		s2 = ts2;
 		data = std::shared_ptr<c>(k);
 	}
 	jarray2(int ts1, int ts2, int ini) :jarray2(ts1, ts2)
@@ -84,32 +80,25 @@ public:
 	{
 		data = t.data;
 		s1 = t.s1;
-		s2 = t.s2;
 		data->s1 = t.data->s1;
 		data->s2 = t.data->s2;
 	}
 	class c;
 	c& jarray2::operator[](int k)
 	{
-		if (k >= 0 && k < s1)
-		{
-			(*data).k1 = k;
-			return (*data);
-		}
-		else
-		{
-			throw std::exception("this index is invalid");
-		}
+		(*data).k1 = k;
+		return (*data);
 	}
-	std::pair<int, int> size()
+	int size()
 	{
-		return std::pair<int, int>(s1, s2);
+		return s1;
 	}
 	class c
 	{
-	public:
-		int* v;
+		friend class jarray2;
 		int s2, k1, s1;
+		int* v;
+	public:
 		c(int ts1, int ts2)
 		{
 			v = new int[ts1*ts2];
@@ -123,17 +112,16 @@ public:
 		}
 		int& c::operator[](int k)
 		{
-			if (k < s2 && k >= 0)
-				return v[k1*s1 + k];
-			else
-			{
-				throw std::exception("this index is invalid");
-			}
+			return v[k1*s2 + k];
+		}
+		int size()
+		{
+			return s2;
 		}
 	};
 private:
 	std::shared_ptr<c>data;
-	int s1, s2;
+	int s1;
 };
 
 
@@ -160,12 +148,7 @@ public:
 		}
 		int& a::operator[](int k)
 		{
-			if (k >= 0 && k < s)
-			{
-				return v[index + k];
-			}
-			else
-				throw std::exception("the 3rd index is invalid");
+			return v[index + k];
 		}
 	};
 	class b
@@ -187,13 +170,8 @@ public:
 		}
 		a& b::operator[](int k)
 		{
-			if (k >= 0 && k < s)
-			{
-				aa->index += k*s;
-				return *aa;
-			}
-			else
-				throw std::exception("the 2rd index is invalid");
+			aa->index += k*aa->s;
+			return *aa;
 		}
 	};
 	jarray3()
@@ -220,13 +198,8 @@ public:
 	}
 	b& jarray3::operator[](int k)
 	{
-		if (k >= 0 && k < s)
-		{
-			data->aa->index = k*s*(data->s);
-			return (*data);
-		}
-		else
-			throw std::exception("the 1st index is invalid");
+		data->aa->index = k*(data->aa->s)*(data->s);
+		return (*data);
 	}
 	int size()
 	{
@@ -314,18 +287,14 @@ public:
 	}
 	int& get(std::initializer_list<int>in)
 	{
-		//if (in.size() == d)
-		
-			int index = 0;
-			index += *(in.begin());
-			for (int i = 1; i < d; ++i)
-			{
-				index *= (*s)[i - 1];
-				index += *(in.begin() + i);
-			}
-			return (*p)[index];
-		
-
+		int index = 0;
+		index += *(in.begin());
+		for (int i = 1; i < d; ++i)
+		{
+			index *= (*s)[i];
+			index += *(in.begin() + i);
+		}
+		return (*p)[index];
 	}
 	int size()
 	{

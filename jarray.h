@@ -9,23 +9,21 @@ public:
 	}
 	jarray1(std::initializer_list<int>li)
 	{
-		b* k = new b(li.size());
 		s = li.size();
-		data = std::shared_ptr<b>(k);
+		data = std::shared_ptr<int>(new int[li.size()], [](int*p) { delete[]p; });
 		for (int i = 0; i < int(li.size()); ++i)
 		{
-			((*data).v)[i] = *(li.begin() + i);
+			*(data.get() + i) = *(li.begin() + i);
 		}
 	}
-	jarray1(int s)
+	jarray1(int ts)
 	{
-		b* k = new b(s);
-		s = s;
-		data = std::shared_ptr<b>(k);
+		s = ts;
+		data = std::shared_ptr<int>(new int[ts], [](int*p) { delete[]p; });
 	}
 	jarray1(int ts1, int ini) :jarray1(ts1)
 	{
-		memset(data->v, 0 , ts1 * 4);
+		memset(&*data, 0, ts1 * 4);
 	}
 	jarray1(jarray1&t)
 	{
@@ -37,28 +35,22 @@ public:
 	{
 		return s;
 	}
-private:
-	class b
+	int* begin()
 	{
-	public:
-		int* v;
-		b(int s)
-		{
-			v = new int[s];
-		}
-		~b()
-		{
-			delete[]v;
-		}
-	};
-	std::shared_ptr<b>data;
+		return &*data;
+	}
+	const int* const end()
+	{
+		return &*data + s;
+	}
+private:
+	std::shared_ptr<int>data;
 	int s;
 };
 int& jarray1::operator[](int k)
 {
-	return ((*data).v)[k];
+	return *(&*data + k);
 }
-
 
 class jarray2
 {
@@ -312,4 +304,112 @@ private:
 	int d;
 	std::shared_ptr<int*>p;
 	std::shared_ptr<int*>s;
+};
+
+template<class T> class my_ptr
+{
+private:
+	int flag;
+	int* c;
+	T* v;
+public:
+	my_ptr()
+	{
+		flag = 0;
+	}
+	my_ptr(my_ptr&t)
+	{
+		flag = 1;
+		v = t.v;
+		c = t.c;
+		++(*c);
+	}
+	my_ptr& my_ptr::operator=(my_ptr&t)
+	{
+		if (!flag)
+			flag = 1;
+		else
+		{
+			--(*c);
+			if (*c == 0)
+				delete[] v;
+		}
+		v = t.v;
+		c = t.c;
+		++(*c);
+		return *this;
+	}
+	my_ptr(T* t)
+	{
+		flag = 1;
+		v = t;
+		c = new int(1);
+	}
+	~my_ptr()
+	{
+		if (flag)
+		{
+			--(*c);
+			if ((*c) == 0)
+			{
+				delete c;
+				delete[] v;
+			}
+		}
+	}
+	T* my_ptr::operator*()
+	{
+		return v;
+	}
+};
+
+template<class T> class my_array
+{
+public:
+	my_array()
+	{
+	}
+	my_array(std::initializer_list<T>li)
+	{
+		T* k = new T(li.size());
+		s = li.size();
+		data = my_ptr<T>(k);
+		for (int i = 0; i < int(li.size()); ++i)
+		{
+			(*data)[i] = *(li.begin() + i);
+		}
+	}
+	my_array(int ts)
+	{
+		s = ts;
+		data = my_ptr<T>(new T[ts]);
+	}
+	my_array(int ts1, int ini) :my_array(ts1)
+	{
+		memset(*data, 0, ts1 * sizeof(T));
+	}
+	my_array(my_array&t)
+	{
+		data = t.data;
+		s = t.s;
+	}
+	T& my_array::operator[](int k)
+	{
+		return (*data)[k];
+	}
+	int size()
+	{
+		return s;
+	}
+	T* begin()
+	{
+		return *data;
+	}
+	const T* const end()
+	{
+		return *data + s;
+	}
+private:
+	my_ptr<T>data;
+	int s;
 };

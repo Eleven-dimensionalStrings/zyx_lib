@@ -27,9 +27,7 @@ namespace LemonJavaArray
 	class jarray1
 	{
 	public:
-		jarray1()
-		{
-		}
+		jarray1();
 		jarray1(std::initializer_list<int>li);
 		jarray1(int ts);
 		jarray1(int ts1, int ini);
@@ -165,7 +163,7 @@ namespace LemonJavaArray
 	public:
 		jarrayn()
 		{
-			//ÏÂÃæÕâ¿é±¾À´±»ÎÒ×¢ÊÍµôÁË,ÍüÁËÊÇÊ²Ã´Ô­Òò
+			//ä¸‹é¢è¿™å—æœ¬æ¥è¢«æˆ‘æ³¨é‡Šæ‰äº†,å¿˜äº†æ˜¯ä»€ä¹ˆåŸå› 
 			int* a = new int[1];
 			int* b = new int[1];
 			int **c = new int*(a);

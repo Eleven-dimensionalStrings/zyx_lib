@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <memory>
 namespace LemonJavaArray
 {
@@ -17,7 +18,7 @@ namespace LemonJavaArray
 		my_ptr(my_ptr&& t);
 		~my_ptr();
 
-		my_ptr<T>& my_ptr::operator=(my_ptr<T>t);
+		my_ptr<T>& my_ptr::operator=(my_ptr<T>&t);
 		T& my_ptr::operator*();
 		T* my_ptr::operator->();
 		T* get();
@@ -163,7 +164,7 @@ namespace LemonJavaArray
 	public:
 		jarrayn()
 		{
-			//ä¸‹é¢è¿™å—æœ¬æ¥è¢«æˆ‘æ³¨é‡Šæ‰äº†,å¿˜äº†æ˜¯ä»€ä¹ˆåŸå› 
+			//ÏÂÃæÕâ¿é±¾À´±»ÎÒ×¢ÊÍµôÁË,ÍüÁËÊÇÊ²Ã´Ô­Òò
 			int* a = new int[1];
 			int* b = new int[1];
 			int **c = new int*(a);

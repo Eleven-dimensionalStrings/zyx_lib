@@ -2,7 +2,7 @@
 
 namespace LemonJavaArray
 {
-	LemonJavaArray::jarray2::jarray2()
+	LemonJavaArray::jarray2::jarray2() :data()
 	{
 	}
 
@@ -27,7 +27,7 @@ namespace LemonJavaArray
 		data->s2 = t.data->s2;
 	}
 
-	LemonJavaArray::jarray2::jarray2(jarray2 && t):data(t.data),s1(t.s1)
+	LemonJavaArray::jarray2::jarray2(jarray2 && t) :data(t.data), s1(t.s1)
 	{
 		data->s1 = t.data->s1;
 		data->s2 = t.data->s2;
@@ -61,12 +61,12 @@ namespace LemonJavaArray
 		(*data).k1 = k;
 		return (*data);
 	}
-	LemonJavaArray::jarray2::c::c(int ts1, int ts2):s2(ts2), k1(0), s1(ts1),v(new int[ts2*ts1])
+	LemonJavaArray::jarray2::c::c(int ts1, int ts2) :s2(ts2), k1(0), s1(ts1), v(new int[ts2*ts1])
 	{
 	}
 	LemonJavaArray::jarray2::c::~c()
 	{
-		delete[]v;
+		delete[] v;
 	}
 	int& jarray2::c::operator[](int k)
 	{
@@ -80,17 +80,19 @@ namespace LemonJavaArray
 
 
 	template<class T>
-	inline my_ptr<T>::my_ptr() :flag(0), c(0), v(nullptr)
+	inline my_ptr<T>::my_ptr() :flag(0), c(nullptr), v(nullptr)
 	{
 	}
 
 	template<class T>
-	my_ptr<T>& my_ptr<T>::operator=(my_ptr<T> t)
+	my_ptr<T>& my_ptr<T>::operator=(my_ptr<T>& t)
 	{
+
 		if (!flag)
 			flag = 1;
 		else
 		{
+			//std::cout << (*c) << std::endl;
 			--(*c);
 			if (*c == 0)
 			{
@@ -105,7 +107,7 @@ namespace LemonJavaArray
 	}
 
 	template<class T>
-	my_ptr<T>::my_ptr(my_ptr<T>&t):flag(1),c(t.c),v(t.v)
+	my_ptr<T>::my_ptr(my_ptr<T>&t) :flag(1), c(t.c), v(t.v)
 	{
 		++(*c);
 	}
@@ -152,6 +154,9 @@ namespace LemonJavaArray
 	T * my_ptr<T>::get()
 	{
 		return v;
+	}
+	jarray1::jarray1()
+	{
 	}
 	jarray1::jarray1(std::initializer_list<int> li)
 	{

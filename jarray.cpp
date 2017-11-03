@@ -2,18 +2,15 @@
 
 namespace LemonJavaArray
 {
-	LemonJavaArray::jarray2::jarray2() :data()
+	LemonJavaArray::jarray2::jarray2() :data(), s1(0)
 	{
 	}
 
-	LemonJavaArray::jarray2::jarray2(int ts1, int ts2)
+	LemonJavaArray::jarray2::jarray2(int ts1, int ts2) : data(std::move(my_ptr<c>(new c(ts1, ts2)))), s1(ts1)
 	{
-		c* k = new c(ts1, ts2);
-		s1 = ts1;
-		data = my_ptr<c>(k);
 	}
 
-	LemonJavaArray::jarray2::jarray2(int ts1, int ts2, int ini) :jarray2(ts1, ts2)
+	LemonJavaArray::jarray2::jarray2(int ts1, int ts2, int ini) : jarray2(ts1, ts2)
 	{
 		if (ini)
 			memset(data->v, 0, ts1*ts2 * 4);
@@ -23,22 +20,31 @@ namespace LemonJavaArray
 	{
 		data = t.data;
 		s1 = t.s1;
-		data->s1 = t.data->s1;
-		data->s2 = t.data->s2;
+		if (t.data)
+		{
+			data->s1 = t.data->s1;
+			data->s2 = t.data->s2;
+		}
 	}
 
 	LemonJavaArray::jarray2::jarray2(jarray2 && t) :data(t.data), s1(t.s1)
 	{
-		data->s1 = t.data->s1;
-		data->s2 = t.data->s2;
+		if (t.data)
+		{
+			data->s1 = t.data->s1;
+			data->s2 = t.data->s2;
+		}
 	}
 
 	jarray2 LemonJavaArray::jarray2::operator=(jarray2 & t)
 	{
 		data = t.data;
 		s1 = t.s1;
-		data->s1 = t.data->s1;
-		data->s2 = t.data->s2;
+		if (t.data)
+		{
+			data->s1 = t.data->s1;
+			data->s2 = t.data->s2;
+		}
 		return *this;
 	}
 
@@ -46,14 +52,21 @@ namespace LemonJavaArray
 	{
 		data = t.data;
 		s1 = t.s1;
-		data->s1 = t.data->s1;
-		data->s2 = t.data->s2;
+		if (t.data)
+		{
+			data->s1 = t.data->s1;
+			data->s2 = t.data->s2;
+		}
 		return *this;
 	}
 
 	int LemonJavaArray::jarray2::size()
 	{
 		return s1;
+	}
+
+	jarray2::jarray2(int t) :data(), s1(0)
+	{
 	}
 
 	jarray2::c& LemonJavaArray::jarray2::operator[](int k)
@@ -80,19 +93,21 @@ namespace LemonJavaArray
 
 
 	template<class T>
+	my_ptr<T>::operator bool() const
+	{
+		return c;
+	}
+
+	template<class T>
 	inline my_ptr<T>::my_ptr() :flag(0), c(nullptr), v(nullptr)
 	{
 	}
 
 	template<class T>
-	my_ptr<T>& my_ptr<T>::operator=(my_ptr<T>& t)
+	my_ptr<T>& my_ptr<T>::operator=(my_ptr<T> t)
 	{
-
-		if (!flag)
-			flag = 1;
-		else
+		if (c)
 		{
-			//std::cout << (*c) << std::endl;
 			--(*c);
 			if (*c == 0)
 			{
@@ -102,20 +117,24 @@ namespace LemonJavaArray
 		}
 		v = t.v;
 		c = t.c;
-		++(*c);
+		if (c)
+			++(*c);
 		return *this;
 	}
+
 
 	template<class T>
 	my_ptr<T>::my_ptr(my_ptr<T>&t) :flag(1), c(t.c), v(t.v)
 	{
-		++(*c);
+		if (c)
+			++(*c);
 	}
 
 	template<class T>
-	my_ptr<T>::my_ptr(my_ptr<T> && t) :flag(1), c(t.c), v(t.v)
+	my_ptr<T>::my_ptr(my_ptr<T> && t) :flag(1), c(std::move(t.c)), v(std::move(t.v))
 	{
-		++(*c);
+		if (c)
+			++(*c);
 	}
 
 	template<class T>
@@ -129,7 +148,7 @@ namespace LemonJavaArray
 	template<class T>
 	my_ptr<T>::~my_ptr()
 	{
-		if (flag)
+		if (c)
 		{
 			--(*c);
 			if (*c == 0)
@@ -158,21 +177,18 @@ namespace LemonJavaArray
 	jarray1::jarray1()
 	{
 	}
-	jarray1::jarray1(std::initializer_list<int> li)
+	jarray1::jarray1(std::initializer_list<int> li) :data(std::move(my_ptr<int>(new int[li.size()]))),
+		s(std::move(static_cast<int>(li.size())))
 	{
-		s = static_cast<int>(li.size());
-		data = my_ptr<int>(new int[li.size()]);
 		for (int i = 0; i < int(li.size()); ++i)
 		{
 			*(data.get() + i) = *(li.begin() + i);
 		}
 	}
-	jarray1::jarray1(int ts)
+	jarray1::jarray1(int ts) :data(std::move(my_ptr<int>(new int[ts]))), s(std::move(ts))
 	{
-		s = ts;
-		data = my_ptr<int>(new int[ts]);
 	}
-	jarray1::jarray1(int ts1, int ini) :jarray1(ts1)
+	jarray1::jarray1(int ts1, int ini) : jarray1(ts1)
 	{
 		if (ini)
 			memset(&*data, 0, ts1 * 4);

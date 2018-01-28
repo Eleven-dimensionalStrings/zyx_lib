@@ -1,17 +1,16 @@
 #pragma once
-#include <iostream>
-#include <memory>
-#include "DataStructureCourseHW.h"
+#include <initializer_list>
+#include <utility>
+#include <exception>
 namespace LemonJavaArray
 {
-
-	template<class T>
+	//用于数组
+	template<class T = int>
 	class my_ptr
 	{
 	private:
-		int flag;
-		int* c;
-		T* v;
+		int* count;
+		T* manage;
 	public:
 		operator bool()const;
 		my_ptr();
@@ -19,295 +18,339 @@ namespace LemonJavaArray
 		my_ptr(my_ptr&t);
 		my_ptr(my_ptr&& t);
 		~my_ptr();
-		my_ptr<T>& my_ptr::operator=(my_ptr<T>t);
-		T& my_ptr::operator*();
-		T* my_ptr::operator->();
+		my_ptr<T>& operator=(my_ptr<T>&t);
+		my_ptr<T>& operator=(my_ptr<T>&&t);
+		T& operator*();
+		T* operator->();
 		T* get();
 	};
 
-
+	template<class T>
 	class jarray1
 	{
 	public:
 		jarray1();
-		jarray1(std::initializer_list<int>li);
+		jarray1(std::initializer_list<T>li);
 		jarray1(int ts);
-		jarray1(int ts1, int ini);
+		jarray1(int ts1, int ini);//ini为0则不初始化,否则用memset初始化为0
 		jarray1(jarray1&t);
-		int& jarray1::operator[](int k);
-		int size();
-		int* begin();
-		const int* const end();
+		jarray1(jarray1&&t);
+		T& operator[](unsigned int k);
+		unsigned int size();
+		T* begin();//懒得写迭代器,反正没什么必要
+		const T* const end();
+		jarray1& operator=(jarray1& t);
+		jarray1& operator=(jarray1&& t);
 	private:
-		my_ptr<int>data;
-		int s;
+		my_ptr<T>data;
+		unsigned int _size;
 	};
 
 
 
 
+	template<class T>
 	class jarray2
 	{
 	public:
-		class c
+		class count
 		{
 			friend class jarray2;
-			int s2, k1, s1;
-			int* v;
+			unsigned int s2, k1, s1;
+			int* manage;
 		public:
-			c(int ts1, int ts2);
-			~c();
-			int& c::operator[](int k);
-			int size();
+			count(int ts1, int ts2);
+			~count();
+			T& operator[](unsigned int k);
+			unsigned int size();
 		};
 		jarray2();
-		jarray2(int ts1, int ts2);
-		jarray2(int ts1, int ts2, int ini);
+		jarray2(unsigned int ts1, unsigned int ts2);
+		jarray2(unsigned int ts1, unsigned int ts2, int ini);
 		jarray2(jarray2& t);
 		jarray2(jarray2&& t);
-		c& jarray2::operator[](int k);
+		count& operator[](unsigned int k);
 		jarray2 operator=(jarray2& t);
 		jarray2 operator=(jarray2&& t);
-		int size();
+		unsigned int size();
 
-		//只用来完成[jarray2 a(xxx,xxx);a=0;]这种操作
+		/*
+		只用来完成
+		jarray2 a(xxx,xxx);
+		....
+		a=0;
+		这种操作
+		*/
 		jarray2(int t);
 	private:
-		my_ptr<c>data;
+		my_ptr<count>data;
 		int s1;
 	};
 
 
 
-	/*	so fucking to make it right
-		class jarray3
-		{
-		public:
-			class a
-			{
-			public:
-				a()
-				{
-				}
-				~a()
-				{
-					delete[] v;
-				}
-				int s;
-				int * v;
-				int index;
-				int size()
-				{
-					return s;
-				}
-				int& a::operator[](int k)
-				{
-					return v[index + k];
-				}
-			};
-			class b
-			{
-			public:
-				b()
-				{
-					aa = new a();
-				}
-				~b()
-				{
-					delete aa;
-				}
-				int s;
-				a* aa;
-				int size()
-				{
-					return s;
-				}
-				a& b::operator[](int k)
-				{
-					aa->index += k*aa->s;
-					return *aa;
-				}
-			};
-			jarray3()
-			{
-			}
-			jarray3(int ts1, int ts2, int ts3)
-			{
-				data = my_ptr<b>(new b());
-				s = ts1;
-				data->s = ts2;
-				data->aa->s = ts3;
-				data->aa->v = new int[ts1*ts2*ts3];
-			}
-			jarray3(int ts1, int ts2, int ts3, int ini) :jarray3(ts1, ts2, ts3)
-			{
-				if (ini)
-					memset(data->aa->v, 0, ts1*ts2*ts3 * 4);
-			}
-			jarray3(jarray3&t)
-			{
-				data = t.data;
-				s = t.s;
-				data->s = t.data->s;
-				data->aa->s = t.data->aa->s;
-			}
-			b& jarray3::operator[](int k)
-			{
-				data->aa->index = k*(data->aa->s)*(data->s);
-				return (*data);
-			}
-			int size()
-			{
-				return s;
-			}
-			my_ptr<b>data;
-			int s;
-		};
-		class jarrayn
-		{
-		public:
-			jarrayn()
-			{
-				//下面这块本来被我注释掉了,忘了是什么原因
-				int* a = new int[1];
-				int* b = new int[1];
-				int **c = new int*(a);
-				int ** d = new int*(b);
-				p = my_ptr<int*>(c);
-				s = my_ptr<int*>(d);
+	template<class T>
+	LemonJavaArray::jarray2<T>::jarray2() :data(), s1(0)
+	{
+	}
 
-				d = 0;
-			}
-			jarrayn(int ts)
-			{
-				d = 1;
-				int* a = new int[ts];
-				int* b = new int[1];
-				int **c = new int*(a);
-				int ** e = new int*(b);
-				p = my_ptr<int*>(c);
-				s = my_ptr<int*>(e);
-				(*s)[0] = ts;
-			}
-			jarrayn(int ts, int in)
-			{
-				d = 1;
-				int* a = new int[ts];
-				int* b = new int[1];
-				int **c = new int*(a);
-				int ** e = new int*(b);
-				p = my_ptr<int*>(c);
-				s = my_ptr<int*>(e);
-				(*s)[0] = ts;
-				if (in)
-					memset(*p, 0, (*s)[0] * 4);
-			}
-			jarrayn(std::initializer_list<int>li)
-			{
-				int size = 1;
-				d = static_cast<int>(li.size() - 1);
-				int * a = new int[d];
-				int **c = new int*(a);
-				s = my_ptr<int*>(c);
-				for (int i = 0; i < d; ++i)
-				{
-					size *= *(li.begin() + i);
-					(*s)[i] = *(li.begin() + i);
-				}
-				int * b = new int[size];
-				int ** e = new int*(b);
-				p = my_ptr<int*>(e);
-				if (*(li.end() - 1))
-					memset(&(*p)[0], 0, size * 4);
-			}
-			jarrayn(jarrayn& t)
-			{
-				d = t.d;
-				p = t.p;
-				s = t.s;
-			}
-			int* get()
-			{
-				return *p;
-			}
-			int& get(int index)
-			{
-				return (*p)[index];
-			}
-			int& get(std::initializer_list<int>in)
-			{
-				int index = 0;
-				index += *(in.begin());
-				for (int i = 1; i < d; ++i)
-				{
-					index *= (*s)[i];
-					index += *(in.begin() + i);
-				}
-				return (*p)[index];
-			}
-			int size()
-			{
-				return (*s)[0];
-			}
-			int size(std::initializer_list<int>in)
-			{
-				return (*s)[in.size()];
-			}
-			int dimension()
-			{
-				return d;
-			}
-		private:
-			int d;
-			my_ptr<int*>p;
-			my_ptr<int*>s;
-		};
-		template<class T> class my_array
+	template<class T>
+	LemonJavaArray::jarray2<T>::jarray2(unsigned int ts1, unsigned int ts2) : data(new count(ts1, ts2)), s1(ts1)
+	{
+	}
+
+	template<class T>
+	LemonJavaArray::jarray2<T>::jarray2(unsigned int ts1, unsigned int ts2, int ini) : jarray2(ts1, ts2)
+	{
+		if (ini)
+			memset(data->manage, 0, ts1*ts2 * 4);
+	}
+
+	template<class T>
+	LemonJavaArray::jarray2<T>::jarray2(jarray2 & t)
+	{
+		data = t.data;
+		s1 = t.s1;
+		if (t.data)
 		{
-		public:
-			my_array()
+			data->s1 = t.data->s1;
+			data->s2 = t.data->s2;
+		}
+	}
+
+	template<class T>
+	LemonJavaArray::jarray2<T>::jarray2(jarray2 && t) :data(std::move(t.data)), s1(t.s1)
+	{
+
+	}
+
+	template<class T>
+	jarray2<T> LemonJavaArray::jarray2<T>::operator=(jarray2 & t)
+	{
+		data = t.data;
+		s1 = t.s1;
+		if (t.data)
+		{
+			data->s1 = t.data->s1;
+			data->s2 = t.data->s2;
+		}
+		return *this;
+	}
+
+	template<class T>
+	jarray2<T> jarray2<T>::operator=(jarray2<T> && t)
+	{
+		data = std::move(t.data);
+		s1 = t.s1;
+		return *this;
+	}
+
+	template<class T>
+	unsigned int LemonJavaArray::jarray2<T>::size()
+	{
+		return s1;
+	}
+
+	template<class T>
+	jarray2<T>::jarray2(int t) :data(), s1(0)
+	{
+		if (!t)
+			throw std::exception("jarray2 obj can only use = 0 to clear. obj = x, which x != 0 is wrong.");
+	}
+
+	template<class T>
+	typename jarray2<T>::count& LemonJavaArray::jarray2<T>::operator[](unsigned int k)
+	{
+		(*data).k1 = k;
+		return (*data);
+	}
+	template<class T>
+	LemonJavaArray::jarray2<T>::count::count(int ts1, int ts2) :s2(ts2), k1(0), s1(ts1), manage(new int[ts2*ts1])
+	{
+	}
+	template<class T>
+	LemonJavaArray::jarray2<T>::count::~count()
+	{
+		delete[] manage;
+	}
+	template<class T>
+	T& jarray2<T>::count::operator[](unsigned int k)
+	{
+		return manage[k1*s2 + k];
+	}
+	template<class T>
+	unsigned int jarray2<T>::count::size()
+	{
+		return s2;
+	}
+
+
+
+	template<class T>
+	my_ptr<T>::operator bool() const
+	{
+		return count;
+	}
+
+	template<class T>
+	inline my_ptr<T>::my_ptr() : count(0), manage(nullptr)
+	{
+	}
+
+	template<class T>
+	my_ptr<T>& my_ptr<T>::operator=(my_ptr<T>& t)
+	{
+		if (count)
+		{
+			--(*count);
+			if (*count == 0)
 			{
+				delete manage;
+				delete count;
 			}
-			my_array(std::initializer_list<T>li)
+		}
+		manage = t.manage;
+		count = t.count;
+		if (count)
+			++(*count);
+		return *this;
+	}
+
+	template<class T>
+	inline my_ptr<T>& my_ptr<T>::operator=(my_ptr<T>&& t)
+	{
+
+		if (count)
+		{
+			--(*count);
+			if (*count == 0)
 			{
-				T* k = new T(li.size());
-				s = li.size();
-				data = my_ptr<T>(k);
-				for (int i = 0; i < int(li.size()); ++i)
-				{
-					(*data)[i] = *(li.begin() + i);
-				}
+				delete manage;
+				delete count;
 			}
-			my_array(int ts) : data(new T[ts]), s(ts)
+		}
+		manage = t.manage;
+		count = t.count;
+		t.count = 0;
+		t.manage = nullptr;
+		return *this;
+	}
+
+	template<class T>
+	my_ptr<T>::my_ptr(my_ptr<T>&t) : count(t.count), manage(t.manage)
+	{
+		if (count)
+			++(*count);
+	}
+
+	template<class T>
+	my_ptr<T>::my_ptr(my_ptr<T> && t) : count(t.count), manage(t.manage)
+	{
+		t.count = 0;
+		t.manage = nullptr;
+	}
+
+	template<class T>
+	my_ptr<T>::my_ptr(T* t)
+	{
+		manage = t;
+		count = new T(1);
+	}
+
+	template<class T>
+	my_ptr<T>::~my_ptr()
+	{
+		if (count)
+		{
+			--(*count);
+			if (*count == 0)
 			{
+				delete[] manage;
+				delete count;
 			}
-			my_array(my_array&t) :data(t.data), s(t.s)
-			{
-			}
-			T& my_array::operator[](int k)
-			{
-				return (*data)[k];
-			}
-			my_array<T>& my_array::operator=(my_array<T>& t)
-			{
-				s = t.s;
-				data = t.data;
-				return *this;
-			}
-			int size()
-			{
-				return s;
-			}
-			T* begin()
-			{
-				return *data;
-			}
-			const T* const end()
-			{
-				return *data + s;
-			}
-		private:
-			my_ptr<T>data;
-			int s;
-		};*/
+		}
+	}
+
+	template<class T>
+	T& my_ptr<T>::operator*()
+	{
+		return *manage;
+	}
+	template<class T>
+	T* my_ptr<T>::operator->()
+	{
+		return manage;
+	}
+	template<class T>
+	T * my_ptr<T>::get()
+	{
+		return manage;
+	}
+	template<class T>
+	jarray1<T>::jarray1() :data(), _size(0)
+	{
+	}
+	template<class T>
+	jarray1<T>::jarray1(std::initializer_list<T> li) : data(new int[li.size()]),
+		_size(li.size())
+	{
+		for (unsigned int i = 0; i < li.size(); ++i)
+		{
+			*(data.get() + i) = *(li.begin() + i);
+		}
+	}
+	template<class T>
+	jarray1<T>::jarray1(int ts) :data(new T[ts]), _size(ts)
+	{
+	}
+	template<class T>
+	jarray1<T>::jarray1(int ts1, int ini) : jarray1(ts1)
+	{
+		if (ini)
+			memset(&*data, 0, ts1 * sizeof(T));
+	}
+	template<class T>
+	jarray1<T>::jarray1(jarray1 & t)
+	{
+		data = t.data;
+		_size = t._size;
+	}
+	template<class T>
+	inline jarray1<T>::jarray1(jarray1<T> && t) :data(std::move(t.data)), _size(t._size)
+	{
+	}
+	template<class T>
+	T& jarray1<T>::operator[](unsigned int k)
+	{
+		return *(&*data + k);
+	}
+	template<class T>
+	unsigned int jarray1<T>::size()
+	{
+		return _size;
+	}
+	template<class T>
+	T * jarray1<T>::begin()
+	{
+		return &*data;
+	}
+	template<class T>
+	const T * const jarray1<T>::end()
+	{
+		return &*data + _size;
+	}
+	template<class T>
+	inline jarray1<T> & jarray1<T>::operator=(jarray1<T> & t)
+	{
+		data = t.data;
+		_size = t._size;
+		return *this;
+	}
+	template<class T>
+	inline jarray1<T> & jarray1<T>::operator=(jarray1 && t)
+	{
+		data = std::move(t.data);
+		_size = t._size;
+		return *this;
+	}
 }

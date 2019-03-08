@@ -57,11 +57,11 @@ namespace my_container
 			other.val = nullptr;
 			other.vsize = 0;
 			other.vcap = 0;
-			other.~my_vector();
+			other.clear();
 		}
 		my_vector& operator=(const my_vector& other)
 		{
-			this->~my_vector();
+			this->clear();
 			alloc = other.alloc;
 			val = alloc.allocate(other.capacity());
 			vsize = other.size();
@@ -74,7 +74,7 @@ namespace my_container
 		}
 		my_vector& operator=(my_vector&& other)
 		{
-			this->~my_vector();
+			this->clear();
 			alloc = std::move(other.alloc);
 			val = other.val;
 			vsize = other.size();
@@ -82,13 +82,12 @@ namespace my_container
 			other.val = nullptr;
 			other.vsize = 0;
 			other.vcap = 0;
-			other.~my_vector();
+			this->clear();
 			return *this;
 		}
 		~my_vector()
 		{
 			clear();
-			alloc.deallocate(val, capacity());
 		}
 
 		//iterator
@@ -177,7 +176,7 @@ namespace my_container
 			{
 
 			}
-			const_iterator(const iterator&t) :_begin(t.begin), _now(t._now), _end(t._end)
+			const_iterator(const iterator&t) :_begin(t._begin), _now(t._now), _end(t._end)
 			{
 
 			}
@@ -245,7 +244,7 @@ namespace my_container
 			reverse_iterator operator++(int)
 			{
 				--_now;
-				return iterator(_rbegin, _now + 1, _rend);
+				return reverse_iterator(_rbegin, _now + 1, _rend);
 			}
 			reverse_iterator& operator--()
 			{
@@ -255,7 +254,7 @@ namespace my_container
 			reverse_iterator operator--(int)
 			{
 				++_now;
-				return iterator(_rbegin, _now - 1, _rend);
+				return reverse_iterator(_rbegin, _now - 1, _rend);
 			}
 			bool operator==(const reverse_iterator& _other)const
 			{
@@ -444,6 +443,8 @@ namespace my_container
 				(val + i)->~T();
 			}
 			vsize = 0;
+			alloc.deallocate(val, capacity());
+			vcap = 0;
 		}
 		void swap(my_vector&other)noexcept
 		{

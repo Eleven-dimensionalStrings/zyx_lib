@@ -82,7 +82,6 @@ namespace my_container
 			other.val = nullptr;
 			other.vsize = 0;
 			other.vcap = 0;
-			this->clear();
 			return *this;
 		}
 		~my_vector()
